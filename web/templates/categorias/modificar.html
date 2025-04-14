@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% csrf_token %}
+
+
+<div class="container">
+
+    <a href="{% url 'listar_categorias' %}" class="btn btn-primary mb-4 mt-4">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+
+    <h2>Editar Categoría: {{ categoria.nombre }}</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        
+        <div class="mt-3">
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            <a href="{% url 'listar_categorias' %}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+
+
+{% endblock %}
