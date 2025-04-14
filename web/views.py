@@ -8,6 +8,8 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 def index(request):
     return HttpResponse("Hola desde la vista index de la app web.")
 
+def login(request):
+    return render(request, 'login.html')  # Redirige a donde listas las categorías
 
 def eliminar_categoria(request, id):
     categoria = get_object_or_404(Categoria, id=id)
