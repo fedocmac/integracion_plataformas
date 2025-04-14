@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-phz%rhkb&&z5-&bh4+p#_7c7sjthwbdw8x7=-len2c-@n-9o3v'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -68,6 +68,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'adquisiones.wsgi.application'
+
+HANDLER404 = 'web.views.error_404_view'
 
 
 # Database

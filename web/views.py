@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .forms import CategoriaForm
 from .models import Categoria
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.exceptions import PermissionDenied
 
 # Create your views here.
 def index(request):
@@ -64,7 +65,7 @@ def nueva_categoria(request):
 def modificar_categoria(request, id):
     
     categoria = get_object_or_404(Categoria, id=id)
-    
+
     if request.method == 'POST':
         form = CategoriaForm(request.POST, instance=categoria)
         if form.is_valid():
@@ -77,3 +78,7 @@ def modificar_categoria(request, id):
         'form': form,
         'categoria': categoria
     })
+    
+    
+def error_404_view(request, exception):
+    return render(request, '404.html', status=404)
