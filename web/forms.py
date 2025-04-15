@@ -1,8 +1,6 @@
 from django import forms
 from .models import Categoria
 
-class LoginForm(form.Forms):
-    
 
 class CategoriaForm(forms.ModelForm):
     class Meta:
