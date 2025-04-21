@@ -9,6 +9,9 @@ from django.core.exceptions import PermissionDenied
 def index(request):
     return HttpResponse("Hola desde la vista index de la app web.")
 
+def compras(request):
+    return HttpResponse("Pagina de compras")
+
 def login(request):
     return render(request, 'login.html')  # Redirige a donde listas las categorías
 
