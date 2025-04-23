@@ -22,3 +22,24 @@ class Categoria(models.Model):
 
     def __str__(self):
         return self.nombre  # Representación legible en el admin/consola
+    
+
+class Producto(models.Model):
+    nombre = models.CharField(
+        max_length=100,
+        verbose_name='Nombre',
+        unique=True  # Evita nombres duplicados
+    )
+    precio = models.IntegerField(
+        verbose_name='Precio',
+        blank=True,  # Opcional
+        null=True   # Opcional
+    )
+
+    class Meta:
+        verbose_name = 'Producto'
+        verbose_name_plural = 'Productos'
+        ordering = ['nombre']  # Orden alfabético por defecto
+
+    def __str__(self):
+        return self.nombre  # Representación legible en el admin/consola
