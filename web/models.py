@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.validators import MinLengthValidator
+from django.core.validators import MinLengthValidator, MinValueValidator
 
 
 class Categoria(models.Model):
@@ -30,10 +30,13 @@ class Producto(models.Model):
         verbose_name='Nombre',
         unique=True  # Evita nombres duplicados
     )
-    precio = models.IntegerField(
+    precio = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
         verbose_name='Precio',
         blank=True,  # Opcional
-        null=True   # Opcional
+        null=True,   # Opcional
+        validators=[MinValueValidator(0)]
     )
 
     class Meta:
