@@ -10,7 +10,7 @@ def index(request):
     return HttpResponse("Hola desde la vista index de la app web.")
 
 def compras(request):
-    return HttpResponse("Pagina de compras")
+    return render(request, 'compras/compras.html')
 
 def login(request):
     return render(request, 'login.html')  # Redirige a donde listas las categorías
