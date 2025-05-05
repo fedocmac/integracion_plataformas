@@ -4,24 +4,24 @@
 
 <div class="container">
 
-    <a href="{% url 'nueva_categoria' %}" class="btn btn-primary mb-4 mt-4">
+    <a href="{% url 'historial_compras' %}" class="btn btn-primary mb-4 mt-4">
         <i class="bi bi-plus-circle"></i> Historial de compras
     </a>
 
-    <h2>Lista de Categorías</h2>
+    <h2>Lista de Productos</h2>
 
-    <form method="get" class="mb-4">
+    <form method="get" action="{% url 'productos' %}" class="mb-4">
         <div class="input-group">
             <input type="text" 
                    name="q" 
                    class="form-control" 
-                   placeholder="Buscar categorías..." 
+                   placeholder="Buscar productos..." 
                    value="{{ busqueda }}">
             <button type="submit" class="btn btn-primary">
                 <i class="bi bi-search"></i>
             </button>
             {% if busqueda %}
-            <a href="?" class="btn btn-outline-secondary" title="Limpiar búsqueda">
+            <a href="{% url 'productos' %}" class="btn btn-outline-secondary" title="Limpiar búsqueda">
                 <i class="bi bi-x-lg"></i>
             </a>
             {% endif %}
@@ -29,44 +29,36 @@
     </form>
     
     <!-- Lista de categorías -->
-    <ul class="list-group">
-        {% for categoria in categorias %}
-            <li class="list-group-item">
-                <div>
-                {{ categoria.nombre }}
-                <small class="text-muted">{{ categoria.descripcion|default:"Sin descripción" }}</small>
-                
+
+    <div class="row row-cols-1 row-cols-md-4 g-4">
+
+        {% for producto in productos %}
 
 
-                <a href="{% url 'modificar_categoria' categoria.id %}" class="btn btn-link">
-                    <i class="bi bi-pencil-square"></i>
-                </a>
-
-                <button class="btn btn-link" 
-                data-bs-toggle="modal" 
-                data-bs-target="#modalUnico"
-                data-nombre="{{ categoria.nombre }}"
-                data-url="{% url 'eliminar_categoria' categoria.id %}">
-            <i class="bi bi-trash text-danger"></i>
-        </button>
-
+        <div class="col">
+            <a href="{% url 'detalle_producto' producto.id %}" class="text-decoration-none text-dark">
+                <div class="card h-100 hover-shadow">  <!-- h-100 para igualar alturas, hover-shadow para efecto hover -->
+                    <div class="card-body">
+                        <h5 class="card-title">{{ producto.nombre }}</h5>
+                        <p class="card-text">${{ producto.precio|floatformat:2 }}</p>
+                    </div>
                 </div>
-            </li>
-
+            </a>
+        </div>
         {% endfor %}
-    </ul>
+    </div>
 
     <!-- Navegación de páginas -->
     <nav class="mt-4">
         <ul class="pagination">
-            {% if categorias.has_previous %}
+            {% if productos.has_previous %}
             <li class="page-item">
                 <a class="page-link" href="?page=1{% if busqueda %}&q={{ busqueda }}{% endif %}">
                     &laquo; Primera
                 </a>
             </li>
             <li class="page-item">
-                <a class="page-link" href="?page={{ categorias.previous_page_number }}{% if busqueda %}&q={{ busqueda }}{% endif %}">
+                <a class="page-link" href="?page={{ productos.previous_page_number }}{% if busqueda %}&q={{ busqueda }}{% endif %}">
                     Anterior
                 </a>
             </li>
@@ -74,18 +66,18 @@
 
             <li class="page-item disabled">
                 <span class="page-link">
-                    Página {{ categorias.number }} de {{ categorias.paginator.num_pages }}
+                    Página {{ productos.number }} de {{ productos.paginator.num_pages }}
                 </span>
             </li>
 
-            {% if categorias.has_next %}
+            {% if productos.has_next %}
             <li class="page-item">
-                <a class="page-link" href="?page={{ categorias.next_page_number }}{% if busqueda %}&q={{ busqueda }}{% endif %}">
+                <a class="page-link" href="?page={{ productos.next_page_number }}{% if busqueda %}&q={{ busqueda }}{% endif %}">
                     Siguiente
                 </a>
             </li>
             <li class="page-item">
-                <a class="page-link" href="?page={{ categorias.paginator.num_pages }}{% if busqueda %}&q={{ busqueda }}{% endif %}">
+                <a class="page-link" href="?page={{ productos.paginator.num_pages }}{% if busqueda %}&q={{ busqueda }}{% endif %}">
                     Última &raquo;
                 </a>
             </li>

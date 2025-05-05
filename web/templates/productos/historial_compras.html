@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+
+    
+
+    <a href="{% url 'productos' %}" class="btn btn-primary mb-3 mt-3">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+
+    <h2 class="text-center mb-3">Historial de Compras</h2>
+    
+
+    <!-- Lista de compras -->
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Precio</th>
+                <th>Cantidad</th>
+                <th>Fecha</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for compra in compras %}
+                <tr>
+                    <td>{{ compra.producto.nombre }}</td>
+                    <td>${{ compra.precio_compra|floatformat:2 }}</td>
+                    <td>{{ compra.cantidad }}</td>
+                    <td>{{ compra.fecha|date:"Y-m-d H:i" }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+<!-- Navegación de páginas -->
+<nav class="mt-4">
+    <ul class="pagination">
+        {% if compras.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1">
+                    &laquo; Primera
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ compras.previous_page_number }}">
+                    Anterior
+                </a>
+            </li>
+        {% endif %}
+
+        <li class="page-item disabled">
+            <span class="page-link">
+                Página {{ compras.number }} de {{ compras.paginator.num_pages }}
+            </span>
+        </li>
+
+        {% if compras.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ compras.next_page_number }}">
+                    Siguiente
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ compras.paginator.num_pages }}">
+                    Última &raquo;
+                </a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+
+</div>
+
+
+</div>
+
+{% endblock %}
