@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.validators import MinLengthValidator
+from django.core.validators import MinLengthValidator, MinValueValidator
 
 
 class Categoria(models.Model):
@@ -22,3 +22,76 @@ class Categoria(models.Model):
 
     def __str__(self):
         return self.nombre  # Representación legible en el admin/consola
+    
+
+
+class Producto(models.Model):
+    nombre = models.CharField(
+        max_length=100,
+        verbose_name='Nombre',
+        unique=True
+    )
+    precio = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name='Precio',
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(0)]
+    )
+    categoria = models.ForeignKey(
+        Categoria,
+        on_delete=models.SET_NULL,  # Si se borra la categoría, el campo se pondrá a NULL
+        verbose_name='Categoría',
+        blank=True,
+        null=True,
+        related_name='productos'  # Permite acceder a los productos desde una categoría: categoria.productos.all()
+    )
+
+    class Meta:
+        verbose_name = 'Producto'
+        verbose_name_plural = 'Productos'
+        ordering = ['nombre']
+
+    def __str__(self):
+        return self.nombre
+        return self.nombre  # Representación legible en el admin/consola
+    
+    
+class Compra(models.Model):
+    producto = models.ForeignKey(
+        Producto,
+        on_delete=models.PROTECT,  # Evita borrar productos con compras registradas
+        verbose_name='Producto comprado'
+    )
+    fecha = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Fecha de compra'
+    )
+    precio_compra = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name='Precio al momento de compra'
+    )
+    cantidad = models.PositiveIntegerField(
+        default=1,
+        verbose_name='Cantidad',
+        validators=[MinValueValidator(1)]
+    )
+
+    class Meta:
+        verbose_name = 'Compra'
+        verbose_name_plural = 'Compras'
+        ordering = ['-fecha']  # Más recientes primero
+        indexes = [
+            models.Index(fields=['-fecha']),  # Índice para búsquedas por fecha
+        ]
+
+    def __str__(self):
+        return f"Compra #{self.id} - {self.producto.nombre}"
+
+    def save(self, *args, **kwargs):
+        """Guarda el precio actual del producto al momento de la compra"""
+        if not self.precio_compra:  # Solo si no se especificó un precio
+            self.precio_compra = self.producto.precio
+        super().save(*args, **kwargs)
