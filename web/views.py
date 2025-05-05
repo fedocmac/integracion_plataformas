@@ -4,10 +4,20 @@ from .forms import CategoriaForm
 from .models import Categoria, Producto, Compra
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.exceptions import PermissionDenied
+from rest_framework import generics
+from .serializers import CompraSerializer, CategoriaSerializer
 
 # Create your views here.
 def index(request):
     return HttpResponse("Hola desde la vista index de la app web.")
+
+class CompraListAPIView(generics.ListAPIView):
+    queryset = Compra.objects.all()
+    serializer_class = CompraSerializer
+
+class CategoriaListAPIView(generics.ListAPIView):
+    queryset = Categoria.objects.all()
+    serializer_class = CategoriaSerializer
 
 def confirmar_compra(request, compra_id):
     compra = get_object_or_404(Compra, pk=compra_id)
