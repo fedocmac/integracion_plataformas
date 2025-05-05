@@ -24,25 +24,35 @@ class Categoria(models.Model):
         return self.nombre  # Representación legible en el admin/consola
     
 
+
 class Producto(models.Model):
     nombre = models.CharField(
         max_length=100,
         verbose_name='Nombre',
-        unique=True  # Evita nombres duplicados
+        unique=True
     )
     precio = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         verbose_name='Precio',
-        blank=True,  # Opcional
-        null=True,   # Opcional
+        blank=True,
+        null=True,
         validators=[MinValueValidator(0)]
+    )
+    categoria = models.ForeignKey(
+        Categoria,
+        on_delete=models.SET_NULL,  # Si se borra la categoría, el campo se pondrá a NULL
+        verbose_name='Categoría',
+        blank=True,
+        null=True,
+        related_name='productos'  # Permite acceder a los productos desde una categoría: categoria.productos.all()
     )
 
     class Meta:
         verbose_name = 'Producto'
         verbose_name_plural = 'Productos'
-        ordering = ['nombre']  # Orden alfabético por defecto
+        ordering = ['nombre']
 
     def __str__(self):
+        return self.nombre
         return self.nombre  # Representación legible en el admin/consola
