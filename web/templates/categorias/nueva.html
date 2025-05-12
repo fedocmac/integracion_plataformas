@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+
+    <a href="{% url 'listar_categorias' %}" class="btn btn-primary mb-4 mt-4">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+
+    <h2>Registrar Nueva Categoría</h2>
+    <form method="post" class="mt-3">
+        {% csrf_token %}
+        {{ form.as_p }}
+        
+        <button type="submit" class="btn btn-primary">Guardar</button>
+    </form>
+</div>
+
+
+
+{% endblock %}

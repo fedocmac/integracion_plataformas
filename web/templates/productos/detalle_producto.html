@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container my-3">
+
+    <form method="get" action="{% url 'productos' %}" class="mb-4">
+        <div class="input-group">
+            <input type="text" 
+                   name="q" 
+                   class="form-control" 
+                   placeholder="Buscar productos..." 
+                   value="{{ busqueda }}">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-search"></i>
+            </button>
+            {% if busqueda %}
+            <a href="{% url 'productos' %}" class="btn btn-outline-secondary" title="Limpiar búsqueda">
+                <i class="bi bi-x-lg"></i>
+            </a>
+            {% endif %}
+        </div>
+    </form>
+
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card">
+                <div class="card-body">
+                <h5 class="card-title">{{ producto.nombre }}</h5>
+                <h6 class="card-subtitle mb-2 text-body-secondary my-3">Proveedor</h6>
+                <div class="card-text d-flex justify-content-between align-items-center">
+                    <span class="text-muted">Precio</span>
+                    <span class="text-success fw-bold">${{ producto.precio|floatformat:2 }}</span>
+                  </div>
+                  <form action="{% url 'detalle_producto' producto.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-primary w-100 mb-3 my-3">Comprar</button>
+                </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+</div>
+
+
+{% endblock %}

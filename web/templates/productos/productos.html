@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+
+    <a href="{% url 'historial_compras' %}" class="btn btn-primary mb-4 mt-4">
+        <i class="bi bi-plus-circle"></i> Historial de compras
+    </a>
+
+    <h2>Lista de Productos</h2>
+
+    <form method="get" action="{% url 'productos' %}" class="mb-4">
+        <div class="input-group">
+            <input type="text" 
+                   name="q" 
+                   class="form-control" 
+                   placeholder="Buscar productos..." 
+                   value="{{ busqueda }}">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-search"></i>
+            </button>
+            {% if busqueda %}
+            <a href="{% url 'productos' %}" class="btn btn-outline-secondary" title="Limpiar búsqueda">
+                <i class="bi bi-x-lg"></i>
+            </a>
+            {% endif %}
+        </div>
+    </form>
+    
+    <!-- Lista de categorías -->
+
+    <div class="row row-cols-1 row-cols-md-4 g-4">
+
+        {% for producto in productos %}
+
+
+        <div class="col">
+            <a href="{% url 'detalle_producto' producto.id %}" class="text-decoration-none text-dark">
+                <div class="card h-100 hover-shadow">  <!-- h-100 para igualar alturas, hover-shadow para efecto hover -->
+                    <div class="card-body">
+                        <h5 class="card-title">{{ producto.nombre }}</h5>
+                        <p class="card-text">${{ producto.precio|floatformat:2 }}</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Navegación de páginas -->
+    <nav class="mt-4">
+        <ul class="pagination">
+            {% if productos.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% if busqueda %}&q={{ busqueda }}{% endif %}">
+                    &laquo; Primera
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ productos.previous_page_number }}{% if busqueda %}&q={{ busqueda }}{% endif %}">
+                    Anterior
+                </a>
+            </li>
+            {% endif %}
+
+            <li class="page-item disabled">
+                <span class="page-link">
+                    Página {{ productos.number }} de {{ productos.paginator.num_pages }}
+                </span>
+            </li>
+
+            {% if productos.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ productos.next_page_number }}{% if busqueda %}&q={{ busqueda }}{% endif %}">
+                    Siguiente
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ productos.paginator.num_pages }}{% if busqueda %}&q={{ busqueda }}{% endif %}">
+                    Última &raquo;
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <div class="modal fade" id="modalUnico" tabindex="-1" aria-labelledby="modalUnicoLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="modalUnicoLabel">Eliminar Categoría</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+              ¿Estás seguro que deseas eliminar la categoría <strong id="modal-nombre-categoria"></strong>?
+            </div>
+            <div class="modal-footer">
+              <form id="form-eliminar" method="POST">
+                {% csrf_token %}
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-danger">Eliminar</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const modalUnico = document.getElementById('modalUnico');
+        modalUnico.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const nombre = button.getAttribute('data-nombre');
+            const url = button.getAttribute('data-url');
+    
+            const nombreCategoria = modalUnico.querySelector('#modal-nombre-categoria');
+            nombreCategoria.textContent = nombre;
+    
+            const form = modalUnico.querySelector('#form-eliminar');
+            form.action = url;
+        });
+    });
+    </script>
+
+{% endblock %}
