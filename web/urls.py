@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views # Intenta con esta línea
+from .views import CompraListAPIView, CategoriaListAPIView
 
 
 
@@ -15,4 +16,6 @@ path('productos/<int:producto_id>/', views.detalle_producto, name='detalle_produ
 path('productos/historial_compras/', views.historial_compras, name='historial_compras'),
 path('productos/confirmar_compra/<int:compra_id>/', views.confirmar_compra, name='confirmar_compra'),
 path('login/', views.login, name='login'),
+path('api/compras/', CompraListAPIView.as_view(), name='compra-list'),
+path('api/categorias/', CategoriaListAPIView.as_view(), name='categorias-list'),
 ]
