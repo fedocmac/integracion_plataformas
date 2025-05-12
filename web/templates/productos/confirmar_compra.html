@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+
+    <h2 class="text-center my-4">Confirmación de Compra</h2>
+
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">Resumen de la Orden</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Producto:</strong> {{ producto.nombre }}</p>
+                    <p><strong>Precio:</strong> ${{ compra.precio_compra|floatformat:2 }}</p>
+                    <p><strong>Cantidad:</strong> 1</p> <!-- Si quieres permitir otras cantidades, agrega un campo para ello -->
+                    <p><strong>Total:</strong> ${{ compra.precio_compra|floatformat:2 }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h5>Detalles de la Compra</h5>
+                    <p><strong>ID de Compra:</strong> {{ compra.id }}</p>
+                    <p><strong>Fecha de Compra:</strong> {{ compra.fecha }}</p> <!-- Ajusta el campo según tu modelo -->
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-center">
+            <form action="{% url 'productos' %}" method="get">
+                <button type="submit" class="btn btn-primary">Volver a la tienda</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Agrega estos estilos si quieres ajustar el espaciado y la alineación -->
+<style>
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    .card-body {
+        font-size: 1.1rem;
+    }
+    .card-footer {
+        background-color: #f8f9fa;
+    }
+</style>
+
+
+</div>
+
+{% endblock %}
