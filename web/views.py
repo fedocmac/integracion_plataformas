@@ -11,11 +11,11 @@ from .serializers import CompraSerializer, CategoriaSerializer
 def index(request):
     return HttpResponse("Hola desde la vista index de la app web.")
 
-class CompraListAPIView(generics.ListAPIView):
+class CompraListAPIView(generics.ListCreateAPIView):
     queryset = Compra.objects.all()
     serializer_class = CompraSerializer
 
-class CategoriaListAPIView(generics.ListAPIView):
+class CategoriaListAPIView(generics.ListCreateAPIView):
     queryset = Categoria.objects.all()
     serializer_class = CategoriaSerializer
 
