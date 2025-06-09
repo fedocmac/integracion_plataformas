@@ -6,6 +6,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.exceptions import PermissionDenied
 from rest_framework import generics
 from .serializers import CompraSerializer, CategoriaSerializer
+import requests
 
 # Create your views here.
 def index(request):
@@ -90,7 +91,25 @@ def productos(request):
     return render(request, 'productos/productos.html')
 
 def login(request):
-    return render(request, 'login.html')  # Redirige a donde listas las categorías
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+        response = requests.post('http://35.168.133.16:3000/login', json={
+            'email': email,
+            'password': password
+        })
+
+        if response.status_code == 200:
+            token = response.json().get('token')
+            request.session['token'] = token
+            return redirect('/categorias')  # o cualquier vista segura
+        else:
+            return render(request, 'login.html', {
+                'error': 'Usuario o contraseña incorrectos'
+            })
+
+    return render(request, 'login.html')
 
 def eliminar_categoria(request, id):
     categoria = get_object_or_404(Categoria, id=id)
