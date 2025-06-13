@@ -95,15 +95,8 @@ HANDLER404 = 'web.views.error_404_view'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'adquisiones',
-        'USER': 'user_django',
-        'PASSWORD': 'Pa@/FRn5U![RTT6X',
-        'HOST': '54.145.165.199',
-        'PORT': '3306',
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -148,3 +141,13 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Aquí se recopilarán los
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+LOGIN_URL = "login"      # Django sabe dónde redirigir si no hay sesión
+CSRF_TRUSTED_ORIGINS = ["https://localhost:8000"]
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'duocuc872@gmail.com'          # <- Cambia por tu correo real
+EMAIL_HOST_PASSWORD = 'abco nnvu oouv jdww' # <- NO tu contraseña normal, ¡una contraseña de aplicación!
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

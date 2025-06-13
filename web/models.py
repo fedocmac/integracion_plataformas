@@ -2,6 +2,19 @@ from django.db import models
 from django.core.validators import MinLengthValidator, MinValueValidator
 
 
+
+class UsuarioRegistro(models.Model):
+    username = models.CharField(max_length=150, unique=True)
+    password = models.CharField(max_length=128)
+    email = models.EmailField(unique=True)
+    nombre = models.CharField(max_length=150)
+    apellido = models.CharField(max_length=150)
+    confirmado = models.BooleanField(default=False)
+    codigo_confirmacion = models.CharField(max_length=10, blank=True, null=True)   # <-- AGREGA ESTA LINEA
+
+    def __str__(self):
+        return self.username
+
 class Categoria(models.Model):
     nombre = models.CharField(
         max_length=100,

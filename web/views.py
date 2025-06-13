@@ -3,22 +3,138 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics
-
+from django.contrib.auth.decorators import login_required
 from .models import Categoria, Producto, Compra
 from .forms import CategoriaForm
 from .serializers import CompraSerializer, CategoriaSerializer
-
+from django.contrib.auth.models import User
+from django.contrib import messages
+from django.contrib.auth import authenticate, login as auth_login
+from django.contrib.auth import logout
+from . import views
+from .models import UsuarioRegistro
 import requests
 import json
+from django.core.mail import send_mail  # ← Esto va arriba, entre tus imports
+from django.conf import settings        # ← Esto también
+
+
+import random
+import string
+from django.core.mail import send_mail
+
+from .models import  UsuarioRegistro
+
+
+import random
+from django.core.mail import send_mail
+
+
+
+def login_view(request):
+    if request.method == "POST":
+        print("🔵 Entró a login_view POST")  # <-- TEST
+        username = request.POST.get("username", "").strip()
+        password = request.POST.get("password", "").strip()
+
+        try:
+            usuario = UsuarioRegistro.objects.get(username=username)
+            print("🟢 Usuario encontrado:", usuario.username)  # <-- TEST
+            if usuario.password != password:
+                messages.error(request, "Contraseña incorrecta.")
+                return redirect("login")
+            if not usuario.confirmado:
+                messages.error(request, "Debes confirmar tu cuenta primero.")
+                return redirect("login")
+            request.session["usuario_id"] = usuario.id
+            print("✅ Logueo exitoso")  # <-- TEST
+            return redirect("index")
+        except UsuarioRegistro.DoesNotExist:
+            messages.error(request, "Usuario no encontrado.")
+
+    return render(request, "login.html")
+
+
+
+
+def confirm_view(request):
+    if request.method == "POST":
+        email = request.POST.get("email", "").strip()
+        codigo = request.POST.get("codigo", "").strip()
+
+        if not email or not codigo:
+            messages.error(request, "Debes ingresar correo y código.")
+            return render(request, "confirmar.html")
+
+        try:
+            usuario = UsuarioRegistro.objects.get(email=email, codigo_confirmacion=codigo)
+            usuario.confirmado = True
+            usuario.save()
+            messages.success(request, "Cuenta confirmada, ya puedes ingresar.")
+            return redirect("login")  # Cambia si tu vista de login tiene otro nombre
+        except UsuarioRegistro.DoesNotExist:
+            messages.error(request, "Correo o código incorrecto.")
+
+    return render(request, "confirmar.html")
+
+
+def generar_codigo():
+    return str(random.randint(100000, 999999))  # 6 dígitos
+
+def registrar(request):
+    if request.method == "POST":
+        username = request.POST["username"]
+        password = request.POST["password"]
+        email = request.POST["email"]
+        nombre = request.POST["name"]
+        apellido = request.POST["familyName"]
+
+        # Verifica si ya existe el usuario
+        if UsuarioRegistro.objects.filter(username=username).exists():
+            messages.error(request, "El usuario ya existe.")
+            return redirect("registrar")
+        
+        # Genera y guarda un solo código de confirmación
+        codigo_confirmacion = str(random.randint(100000, 999999))
+
+        # Crea el usuario (no confirmado)
+        nuevo_usuario = UsuarioRegistro.objects.create(
+            username=username,
+            password=password,
+            email=email,
+            nombre=nombre,
+            apellido=apellido,
+            confirmado=False,
+            codigo_confirmacion=codigo_confirmacion  # Usa el mismo
+        )
+
+        # Envía el correo con el código
+        send_mail(
+            "Código de confirmación",
+            f"Tu código es: {codigo_confirmacion}",
+            settings.DEFAULT_FROM_EMAIL,
+            [email],
+            fail_silently=False,
+        )
+
+        messages.success(request, "Te enviamos un código de confirmación a tu correo.")
+        return redirect("confirmar")
+
+    return render(request, "registrar.html")
+def index(request):
+    usuario_id = request.session.get("usuario_id")
+    if not usuario_id:
+        return redirect("login")
+    usuario = UsuarioRegistro.objects.get(pk=usuario_id)
+    return render(request, "index.html", {"usuario": usuario})
+
+
+def logout_view(request):
+    request.session.flush()
+    return redirect("login")
 
 
 # ---------- Vistas generales ----------
-def index(request):
-    return HttpResponse("Hola desde la vista index de la app web.")
-
-
-def login(request):
-    return render(request, 'login.html')  # Página con formulario de login
 
 
 def error_404_view(request, exception):
@@ -65,8 +181,6 @@ def proxy_register(request):
             return JsonResponse({"message": "Error interno del servidor."}, status=500)
     else:
         return JsonResponse({"message": "Método no permitido"}, status=405)
-
-
 
 # ---------- API REST ----------
 class CompraListAPIView(generics.ListCreateAPIView):
@@ -137,6 +251,7 @@ def eliminar_categoria(request, id):
 
 
 # ---------- Productos y Compras ----------
+@login_required
 def listar_productos(request):
     busqueda = request.GET.get('q', '')
     productos_list = Producto.objects.filter(nombre__icontains=busqueda).order_by('nombre') if busqueda else Producto.objects.all().order_by('nombre')
@@ -174,7 +289,7 @@ def confirmar_compra(request, compra_id):
         'compra': compra
     })
 
-
+@login_required
 def historial_compras(request):
     compras_list = Compra.objects.all()
     paginator = Paginator(compras_list, 10)
@@ -187,6 +302,3 @@ def historial_compras(request):
         compras = paginator.page(paginator.num_pages)
 
     return render(request, 'productos/historial_compras.html', {'compras': compras})
-
-def registrar(request):
-    return render(request, "registrar.html")  # tu archivo se llama así
