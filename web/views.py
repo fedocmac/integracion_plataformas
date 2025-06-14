@@ -61,7 +61,7 @@ def historial_compras(request):
     })
     
 
-def listar_productos(request):
+"""def listar_productos(request):
     # Obtener el término de búsqueda (si existe)
     busqueda = request.GET.get('q', '')
     
@@ -89,6 +89,72 @@ def listar_productos(request):
 
 def productos(request):
     return render(request, 'productos/productos.html')
+    """
+    
+def listar_productos(request):
+    busqueda = request.GET.get('q', '')
+
+    try:
+        # 1. Obtener todos los productos
+        productos_res = requests.get('https://integracionstock-etefhkhbcadegaej.brazilsouth-01.azurewebsites.net/products')
+        productos_data = productos_res.json()
+        
+        print("Productos obtenidos:", len(productos_data), "productos")
+        
+    except Exception as e:
+        print("Error al consumir productos:", e)
+        productos_data = []
+
+    # 2. Filtrar por búsqueda local (por nombre, si existe)
+    if busqueda:
+        productos_data = [p for p in productos_data if busqueda.lower() in p.get('name', '').lower()]
+
+    productos_completos = []
+
+    for producto in productos_data:
+        producto_id = producto.get('id')
+        categoria_id = producto.get('categoryId')
+
+        # Obtener inventario
+        try:
+            inv_res = requests.get(f'https://integracionstock-etefhkhbcadegaej.brazilsouth-01.azurewebsites.net/inventory/{producto_id}')
+            inventario = inv_res.json()
+        except Exception as e:
+            print(f"Error al obtener inventario del producto {producto_id}:", e)
+            inventario = {}
+
+        # Obtener categoría
+        try:
+            cat_res = requests.get(f'https://integracionstock-etefhkhbcadegaej.brazilsouth-01.azurewebsites.net/product-category/{categoria_id}')
+            categoria = cat_res.json()
+        except Exception as e:
+            print(f"Error al obtener categoría del producto {producto_id}:", e)
+            categoria = {}
+
+        # Combinar en un solo objeto
+        producto_completo = {
+            'id': producto.get('id'),
+            'sku': producto.get('sku'),
+            'nombre': producto.get('name'),
+            'descripcion': producto.get('description'),
+            'precio': producto.get('price'),
+            'costo': producto.get('cost'),
+            'stock': inventario.get('quantity', 'N/D'),
+            'min_stock': inventario.get('minStock', 'N/D'),
+            'ubicacion': inventario.get('location', ''),
+            'categoria': categoria.get('name', 'Sin categoría'),
+        }
+
+        productos_completos.append(producto_completo)
+        
+        
+
+    productos = productos_completos
+
+    return render(request, 'productos/productos.html', {
+        'productos': productos,
+        'busqueda': busqueda,
+    })
 
 def login(request):
     if request.method == 'POST':
