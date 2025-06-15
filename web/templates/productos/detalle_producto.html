@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load formatos %}
 {% block content %}
 
 <div class="container my-3">
@@ -26,13 +26,27 @@
         <div class="col-md-5">
             <div class="card">
                 <div class="card-body">
-                <h5 class="card-title">{{ producto.nombre }}</h5>
-                <h6 class="card-subtitle mb-2 text-body-secondary my-3">Proveedor</h6>
-                <div class="card-text d-flex justify-content-between align-items-center">
+                <h5 class="card-title">{{ producto.name }}</h5>
+                <div class="card-text d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted">SKU</span>
+                    <span class="text-muted fw-bold">{{ producto.sku }}</span>
+                </div>
+                <div class="card-text d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted">Categoría</span>
+                    <span class="text-muted fw-bold">{{ producto.categoria_nombre }}</span>
+                </div>
+                <div class="card-text d-flex justify-content-between align-items-center mb-3">
                     <span class="text-muted">Precio</span>
-                    <span class="text-success fw-bold">${{ producto.precio|floatformat:2 }}</span>
-                  </div>
-                  <form action="{% url 'detalle_producto' producto.id %}" method="post">
+                    <span class="text-success fw-bold">{{ producto.price|clp_format }}</span>
+                </div>
+                <div class="card-text d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted">STOCK</span>
+                    <span class="text-muted fw-bold">{{ producto.stock }}</span>
+                </div>
+
+                <hr>
+
+                <form action="{% url 'detalle_producto' producto.id %}" method="post">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-outline-primary w-100 mb-3 my-3">Comprar</button>
                 </form>

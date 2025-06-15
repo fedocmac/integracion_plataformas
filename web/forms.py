@@ -30,5 +30,3 @@ class CategoriaForm(forms.ModelForm):
                 'max_length': 'La descripción no puede tener más de %(limit_value)d caracteres.',
             }
         }
-    
-    

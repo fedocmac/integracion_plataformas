@@ -1,0 +1,110 @@
+[
+    {
+        "id": 1,
+        "sku": "LAP-GAM-001",
+        "name": "Gaming Laptop Pro X",
+        "description": "High-performance gaming laptop with RTX 3080, 32GB RAM and 1TB NVMe SSD",
+        "price": 219900,
+        "cost": 179900,
+        "categoryId": 1
+    },
+    {
+        "id": 2,
+        "sku": "LAP-ULT-002",
+        "name": "Ultrabook Air 13",
+        "description": "Ultra-thin laptop with 16GB RAM, 512GB SSD and 14-hour battery life",
+        "price": 149900,
+        "cost": 119900,
+        "categoryId": 1
+    },
+    {
+        "id": 3,
+        "sku": "LAP-BUS-003",
+        "name": "Business Notebook Pro",
+        "description": "Business-grade laptop with security features, 16GB RAM and 512GB SSD",
+        "price": 129900,
+        "cost": 99900,
+        "categoryId": 1
+    },
+    {
+        "id": 4,
+        "sku": "COMP-GPU-001",
+        "name": "GeForce RTX 4070 Ti",
+        "description": "High-end graphics card for gaming and content creation",
+        "price": 89900,
+        "cost": 69900,
+        "categoryId": 2
+    },
+    {
+        "id": 5,
+        "sku": "COMP-CPU-002",
+        "name": "AMD Ryzen 9 5950X",
+        "description": "16-core desktop processor for extreme performance",
+        "price": 59900,
+        "cost": 42900,
+        "categoryId": 2
+    },
+    {
+        "id": 6,
+        "sku": "COMP-RAM-003",
+        "name": "32GB DDR5 RAM Kit",
+        "description": "High-speed memory kit (2x16GB) 6000MHz CL36",
+        "price": 24900,
+        "cost": 18900,
+        "categoryId": 2
+    },
+    {
+        "id": 7,
+        "sku": "PERI-KBD-001",
+        "name": "Mechanical Gaming Keyboard",
+        "description": "RGB mechanical keyboard with hot-swappable switches",
+        "price": 12900,
+        "cost": 8900,
+        "categoryId": 3
+    },
+    {
+        "id": 8,
+        "sku": "PERI-MOU-002",
+        "name": "Wireless Gaming Mouse",
+        "description": "Ultra-light wireless gaming mouse with 20K DPI sensor",
+        "price": 8900,
+        "cost": 5900,
+        "categoryId": 3
+    },
+    {
+        "id": 9,
+        "sku": "NET-RTR-001",
+        "name": "WiFi 6E Router",
+        "description": "Tri-band WiFi 6E router with mesh capabilities",
+        "price": 29900,
+        "cost": 19900,
+        "categoryId": 4
+    },
+    {
+        "id": 10,
+        "sku": "NET-SWI-002",
+        "name": "10Gb Network Switch",
+        "description": "8-port managed 10Gb Ethernet switch for home or office",
+        "price": 19900,
+        "cost": 14900,
+        "categoryId": 4
+    },
+    {
+        "id": 11,
+        "sku": "Testeo",
+        "name": "PC",
+        "description": "PC MUY BUENO",
+        "price": 5000,
+        "cost": 20,
+        "categoryId": 1
+    },
+    {
+        "id": 15,
+        "sku": "sdadas",
+        "name": "daw",
+        "description": "dasdada",
+        "price": 12312,
+        "cost": 123123,
+        "categoryId": 1
+    }
+]

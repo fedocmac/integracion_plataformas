@@ -1,0 +1,79 @@
+[
+    {
+        "productId": 1,
+        "quantity": 15,
+        "minStock": 50,
+        "location": "Main Showroom",
+        "lastUpdated": "2025-06-07T22:04:41.150217"
+    },
+    {
+        "productId": 2,
+        "quantity": 25,
+        "minStock": 10,
+        "location": "Main Showroom",
+        "lastUpdated": "2025-06-07T22:04:41.150217"
+    },
+    {
+        "productId": 3,
+        "quantity": 20,
+        "minStock": 8,
+        "location": "Main Showroom",
+        "lastUpdated": "2025-06-07T22:04:41.150217"
+    },
+    {
+        "productId": 4,
+        "quantity": 12,
+        "minStock": 3,
+        "location": "Components Section",
+        "lastUpdated": "2025-06-07T22:04:41.150217"
+    },
+    {
+        "productId": 5,
+        "quantity": 18,
+        "minStock": 5,
+        "location": "Components Section",
+        "lastUpdated": "2025-06-07T22:04:41.150217"
+    },
+    {
+        "productId": 6,
+        "quantity": 35,
+        "minStock": 15,
+        "location": "Components Section",
+        "lastUpdated": "2025-06-07T22:04:41.150217"
+    },
+    {
+        "productId": 7,
+        "quantity": 50,
+        "minStock": 20,
+        "location": "Accessories Area",
+        "lastUpdated": "2025-06-07T22:04:41.150217"
+    },
+    {
+        "productId": 8,
+        "quantity": 65,
+        "minStock": 25,
+        "location": "Accessories Area",
+        "lastUpdated": "2025-06-07T22:04:41.150217"
+    },
+    {
+        "productId": 9,
+        "quantity": 22,
+        "minStock": 8,
+        "location": "Networking Corner",
+        "lastUpdated": "2025-06-07T22:04:41.150217"
+    },
+    {
+        "productId": 10,
+        "quantity": 17,
+        "minStock": 6,
+        "location": "Networking Corner",
+        "lastUpdated": "2025-06-07T22:04:41.150217"
+    },
+    {
+        "productId": 11,
+        "quantity": 10,
+        "minStock": 1,
+        "location": "Peru",
+        "lastUpdated": "2025-06-07T22:27:09.738967"
+    }
+]

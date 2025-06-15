@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load formatos %}
 {% block content %}
 
 <div class="container">
@@ -39,16 +39,60 @@
             <a href="{% url 'detalle_producto' producto.id %}" class="text-decoration-none text-dark">
                 <div class="card h-100 hover-shadow">  <!-- h-100 para igualar alturas, hover-shadow para efecto hover -->
                     <div class="card-body">
-                        <h5 class="card-title">{{ producto.nombre }}</h5>
+                        <h5 class="card-title">{{ producto.name }}</h5>
                         <p class="card-text">SKU: {{ producto.sku }}</p>
-                        <p class="card-text">${{ producto.precio|floatformat:2 }}</p>
+                        <p class="card-text text-success fw-bold">{{ producto.price|clp_format }}</p>
                         <p class="card-text">Stock: {{ producto.stock }}</p>
+                        <p class="card-text">
+                            Stock mínimo: {{ producto.minStock }}
+                            {% if producto.stock < producto.minStock %}
+                                <span class="text-danger">(Stock bajo)</span>
+                            {% endif %}
+                        </p>
+                        <p class="card-text">Categoría: {{ producto.category }}</p>
                     </div>
                 </div>
             </a>
         </div>
         {% endfor %}
     </div>
+
+    <!-- Navegación de páginas -->
+    <nav class="mt-4">
+        <ul class="pagination">
+            {% if productos.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{% if busqueda %}&q={{ busqueda }}{% endif %}">
+                    &laquo; Primera
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ productos.previous_page_number }}{% if busqueda %}&q={{ busqueda }}{% endif %}">
+                    Anterior
+                </a>
+            </li>
+            {% endif %}
+
+            <li class="page-item disabled">
+                <span class="page-link">
+                    Página {{ productos.number }} de {{ productos.paginator.num_pages }}
+                </span>
+            </li>
+
+            {% if productos.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ productos.next_page_number }}{% if busqueda %}&q={{ busqueda }}{% endif %}">
+                    Siguiente
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ productos.paginator.num_pages }}{% if busqueda %}&q={{ busqueda }}{% endif %}">
+                    Última &raquo;
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
 
 
     <div class="modal fade" id="modalUnico" tabindex="-1" aria-labelledby="modalUnicoLabel" aria-hidden="true">

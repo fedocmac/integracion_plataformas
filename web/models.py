@@ -24,7 +24,6 @@ class Categoria(models.Model):
         return self.nombre  # Representación legible en el admin/consola
     
 
-
 class Producto(models.Model):
     nombre = models.CharField(
         max_length=100,
@@ -55,15 +54,10 @@ class Producto(models.Model):
 
     def __str__(self):
         return self.nombre
-        return self.nombre  # Representación legible en el admin/consola
     
     
 class Compra(models.Model):
-    producto = models.ForeignKey(
-        Producto,
-        on_delete=models.PROTECT,  # Evita borrar productos con compras registradas
-        verbose_name='Producto comprado'
-    )
+    producto_id = models.IntegerField(verbose_name='ID del producto')
     fecha = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Fecha de compra'
@@ -86,12 +80,3 @@ class Compra(models.Model):
         indexes = [
             models.Index(fields=['-fecha']),  # Índice para búsquedas por fecha
         ]
-
-    def __str__(self):
-        return f"Compra #{self.id} - {self.producto.nombre}"
-
-    def save(self, *args, **kwargs):
-        """Guarda el precio actual del producto al momento de la compra"""
-        if not self.precio_compra:  # Solo si no se especificó un precio
-            self.precio_compra = self.producto.precio
-        super().save(*args, **kwargs)

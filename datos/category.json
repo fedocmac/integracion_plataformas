@@ -1,0 +1,27 @@
+[
+    {
+        "id": 1,
+        "name": "Laptops",
+        "description": "Portable computers including gaming, business, and ultrabooks"
+    },
+    {
+        "id": 2,
+        "name": "Components",
+        "description": "Computer parts like CPUs, GPUs, motherboards, and RAM"
+    },
+    {
+        "id": 3,
+        "name": "Peripherals",
+        "description": "Keyboards, mice, headsets, and other computer accessories"
+    },
+    {
+        "id": 4,
+        "name": "Networking",
+        "description": "Routers, switches, access points, and networking cables"
+    },
+    {
+        "id": 5,
+        "name": "Computadores",
+        "description": "Computadores..."
+    }
+]

@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'web',
     'rest_framework',
     'rest_framework_simplejwt',
+    'django.contrib.humanize',
 ]
 
 REST_FRAMEWORK = {
