@@ -48,6 +48,12 @@
 
                 <form action="{% url 'detalle_producto' producto.id %}" method="post">
                     {% csrf_token %}
+
+                    <div class="input-group mb-3">
+                        <label class="input-group-text" for="cantidad">Cantidad</label>
+                        <input type="number" class="form-control" name="cantidad" id="cantidad" value="1" min="1" max="100">
+                    </div>
+
                     <button type="submit" class="btn btn-outline-primary w-100 mb-3 my-3">Comprar</button>
                 </form>
                 </div>

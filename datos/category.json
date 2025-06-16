@@ -18,10 +18,5 @@
         "id": 4,
         "name": "Networking",
         "description": "Routers, switches, access points, and networking cables"
-    },
-    {
-        "id": 5,
-        "name": "Computadores",
-        "description": "Computadores..."
     }
 ]

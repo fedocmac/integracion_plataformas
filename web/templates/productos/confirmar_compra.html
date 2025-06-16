@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load formatos %}
 {% block content %}
 
 <div class="container">
@@ -16,8 +16,8 @@
                 <div class="col-md-6">
                     <p><strong>Producto:</strong> {{ producto.name }}</p>
                     <p><strong>Precio:</strong> ${{ compra.precio_compra|floatformat:2 }}</p>
-                    <p><strong>Cantidad:</strong> 1</p> <!-- Si quieres permitir otras cantidades, agrega un campo para ello -->
-                    <p><strong>Total:</strong> ${{ compra.precio_compra|floatformat:2 }}</p>
+                    <p><strong>Cantidad:</strong> {{ compra.cantidad }}</p> <!-- Si quieres permitir otras cantidades, agrega un campo para ello -->
+                    <p><strong>Total:</strong> {{ compra.precio_compra|clp_format }}</p>
                 </div>
                 <div class="col-md-6">
                     <h5>Detalles de la Compra</h5>

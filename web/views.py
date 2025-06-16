@@ -109,6 +109,14 @@ def detalle_producto(request, producto_id):
  
     if request.method == 'POST':
         
+        cantidad = int(request.POST.get('cantidad', 1))  # Por defecto, 1 si no viene nada
+
+        # Validar rango permitido
+        if cantidad < 1:
+            cantidad = 1
+        elif cantidad > 100:
+            cantidad = 100
+        
         api_base_url = "https://integracionstock-etefhkhbcadegaej.brazilsouth-01.azurewebsites.net/inventory"
 
         try:
@@ -122,9 +130,9 @@ def detalle_producto(request, producto_id):
             inventario = inventarios_api[0]  # Tomamos el primer (y único) resultado
 
             # 2. Crear nuevo payload para PUT
-            """updated_data = {
+            updated_data = {
                 "productId": inventario['productId'],
-                "quantity": inventario['quantity'] + 1,
+                "quantity": inventario['quantity'] + cantidad,
                 "minStock": inventario['minStock'],
                 "location": inventario['location'],
                 "lastUpdated": inventario['lastUpdated']
@@ -132,11 +140,11 @@ def detalle_producto(request, producto_id):
 
             # 3. Hacer el PUT con la información actualizada
             put_response = requests.put(api_base_url, json=updated_data)
-            put_response.raise_for_status()"""
+            put_response.raise_for_status()
             
             compra = Compra.objects.create(
                 producto_id=producto_id,
-                cantidad=1,
+                cantidad=cantidad,
                 precio_compra=precio
             )
 
