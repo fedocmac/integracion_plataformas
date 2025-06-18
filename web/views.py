@@ -30,97 +30,75 @@ import random
 from django.core.mail import send_mail
 
 
+# ---------- REGISTRO y CONFIRMACIÓN  (solo vía API externa, sin BD Django) ----------
 
-def login_view(request):
-    if request.method == "POST":
-        print("🔵 Entró a login_view POST")  # <-- TEST
-        username = request.POST.get("username", "").strip()
-        password = request.POST.get("password", "").strip()
+import json, requests
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
-        try:
-            usuario = UsuarioRegistro.objects.get(username=username)
-            print("🟢 Usuario encontrado:", usuario.username)  # <-- TEST
-            if usuario.password != password:
-                messages.error(request, "Contraseña incorrecta.")
-                return redirect("login")
-            if not usuario.confirmado:
-                messages.error(request, "Debes confirmar tu cuenta primero.")
-                return redirect("login")
-            request.session["usuario_id"] = usuario.id
-            print("✅ Logueo exitoso")  # <-- TEST
-            return redirect("index")
-        except UsuarioRegistro.DoesNotExist:
-            messages.error(request, "Usuario no encontrado.")
-
-    return render(request, "login.html")
+API_BASE = "http://35.168.133.16:3000"          # ⇦ usa https:// si tu backend tiene SSL
 
 
+@csrf_exempt                               # ← no usamos CSRF porque solo actuamos como proxy
+def registrar(request):
+    """Registra un usuario en la API externa /register."""
+    if request.method != "POST":
+        return JsonResponse({"message": "Método no permitido"}, status=405)
+
+    try:
+        data = json.loads(request.body)          # {"username":..,"password":.., ...}
+    except ValueError:
+        return JsonResponse({"message": "JSON inválido"}, status=400)
+
+    try:
+        r = requests.post(f"{API_BASE}/register", json=data, timeout=5)
+        return JsonResponse(r.json(), status=r.status_code)
+    except requests.RequestException:
+        return JsonResponse({"message": "No se pudo conectar con la API externa."},
+                            status=502)
 
 
-def confirm_view(request):
-    if request.method == "POST":
-        email = request.POST.get("email", "").strip()
-        codigo = request.POST.get("codigo", "").strip()
+@csrf_exempt
+def confirmar(request):
+    """Confirma el código enviado al correo → /Confirm."""
+    if request.method != "POST":
+        return JsonResponse({"message": "Método no permitido"}, status=405)
 
-        if not email or not codigo:
-            messages.error(request, "Debes ingresar correo y código.")
-            return render(request, "confirmar.html")
+    try:
+        data = json.loads(request.body)          # {"username":..,"code":..}
+    except ValueError:
+        return JsonResponse({"message": "JSON inválido"}, status=400)
 
-        try:
-            usuario = UsuarioRegistro.objects.get(email=email, codigo_confirmacion=codigo)
-            usuario.confirmado = True
-            usuario.save()
-            messages.success(request, "Cuenta confirmada, ya puedes ingresar.")
-            return redirect("login")  # Cambia si tu vista de login tiene otro nombre
-        except UsuarioRegistro.DoesNotExist:
-            messages.error(request, "Correo o código incorrecto.")
+    try:
+        r = requests.post(f"{API_BASE}/Confirm", json=data, timeout=5)
+        return JsonResponse(r.json(), status=r.status_code)
+    except requests.RequestException:
+        return JsonResponse({"message": "No se pudo conectar con la API externa."},
+                            status=502)
 
-    return render(request, "confirmar.html")
+
+@csrf_exempt
+def login_api(request):
+    if request.method != "POST":
+        return JsonResponse({"message": "Método no permitido"}, status=405)
+
+    try:
+        data = json.loads(request.body)       # {"username": "...", "password": "..."}
+    except ValueError:
+        return JsonResponse({"message": "JSON inválido"}, status=400)
+
+    try:
+        r = requests.post(f"{API_BASE}/login", json=data, timeout=5)
+        return JsonResponse(r.json(), status=r.status_code)
+    except requests.RequestException:
+        return JsonResponse({"message": "No se pudo conectar con la API externa."}, status=502)
 
 
 def generar_codigo():
     return str(random.randint(100000, 999999))  # 6 dígitos
 
-def registrar(request):
-    if request.method == "POST":
-        username = request.POST["username"]
-        password = request.POST["password"]
-        email = request.POST["email"]
-        nombre = request.POST["name"]
-        apellido = request.POST["familyName"]
 
-        # Verifica si ya existe el usuario
-        if UsuarioRegistro.objects.filter(username=username).exists():
-            messages.error(request, "El usuario ya existe.")
-            return redirect("registrar")
-        
-        # Genera y guarda un solo código de confirmación
-        codigo_confirmacion = str(random.randint(100000, 999999))
 
-        # Crea el usuario (no confirmado)
-        nuevo_usuario = UsuarioRegistro.objects.create(
-            username=username,
-            password=password,
-            email=email,
-            nombre=nombre,
-            apellido=apellido,
-            confirmado=False,
-            codigo_confirmacion=codigo_confirmacion  # Usa el mismo
-        )
-
-        # Envía el correo con el código
-        send_mail(
-            "Código de confirmación",
-            f"Tu código es: {codigo_confirmacion}",
-            settings.DEFAULT_FROM_EMAIL,
-            [email],
-            fail_silently=False,
-        )
-
-        messages.success(request, "Te enviamos un código de confirmación a tu correo.")
-        return redirect("confirmar")
-
-    return render(request, "registrar.html")
 def index(request):
     usuario_id = request.session.get("usuario_id")
     if not usuario_id:

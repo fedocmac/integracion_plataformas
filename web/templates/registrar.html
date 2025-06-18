@@ -1,64 +1,76 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Registro</title>
+  <style>
+    body{font-family:Arial;margin:2rem;background:#f9f9f9}
+    form{max-width:420px;margin:auto;background:#fff;padding:2rem;border-radius:10px;box-shadow:0 0 10px rgba(0,0,0,.1)}
+    input,button{width:100%;margin:.5rem 0;padding:.7rem;border:1px solid #ccc;border-radius:5px}
+    button{background:#28a745;color:#fff;font-weight:bold;cursor:pointer}
+    button:hover{background:#218838}
+    #msg{text-align:center;margin-top:1rem;font-weight:bold}
+    .nav{text-align:center;margin-top:1rem}
+    .nav a{margin:0 .5rem;color:#007bff;text-decoration:none}
+  </style>
+</head>
+<body>
 
-{% block content %}
-<div class="container col-md-5 mt-5">
-  <h3 class="text-center mb-4">Crear cuenta nueva</h3>
+<h2 style="text-align:center">Crear cuenta</h2>
 
-  <form method="POST">
-    {% csrf_token %}
-    <div class="mb-3">
-      <label for="username" class="form-label">Nombre de usuario</label>
-      <input type="text" class="form-control" id="username" name="username" required>
-    </div>
+<form id="reg-form">
+  <input name="username"   placeholder="Usuario" required>
+  <input name="password"   type="password" placeholder="Contraseña" required>
+  <input name="email"      type="email" placeholder="Correo" required>
+  <input name="name"       placeholder="Nombre" required>
+  <input name="familyName" placeholder="Apellido" required>
+  <button type="submit">Registrar</button>
+</form>
 
-    <div class="form-floating mt-2 position-relative">
-      <input type="password" class="form-control" id="passwordInput" name="password" placeholder="Contraseña" required>
-      <label for="passwordInput">Contraseña</label>
-      <button type="button" onclick="togglePassword()" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); z-index:10;">
-        👁️
-      </button>
-    </div>
+<div id="msg"></div>
 
-    <div class="mb-3 mt-3">
-      <label for="email" class="form-label">Correo electrónico</label>
-      <input type="email" class="form-control" id="email" name="email" required>
-    </div>
-
-    <div class="mb-3">
-      <label for="name" class="form-label">Nombre</label>
-      <input type="text" class="form-control" id="name" name="name" required>
-    </div>
-
-    <div class="mb-3">
-      <label for="familyName" class="form-label">Apellido</label>
-      <input type="text" class="form-control" id="familyName" name="familyName" required>
-    </div>
-
-    <button type="submit" class="btn btn-primary w-100">Registrar</button>
-
-    {% if messages %}
-      <div class="mt-3 text-center">
-        {% for message in messages %}
-          <p class="text-{{ message.tags }}">{{ message }}</p>
-        {% endfor %}
-      </div>
-    {% endif %}
-
-    <small class="form-text text-muted mt-2 d-block text-center">
-      <a href="{% url 'login' %}" class="link-primary">Cancelar</a>
-    </small>
-  </form>
-</div>
-
-<div class="text-center mt-2">
-  <a href="{% url 'confirmar' %}" class="btn btn-outline-primary">Confirmar cuenta</a>
+<div class="nav">
+  <a href="/login/">Login</a> |
+  <a href="/confirmar/">Confirmar cuenta</a>
 </div>
 
 <script>
-  function togglePassword() {
-    const input = document.getElementById("passwordInput");
-    input.type = input.type === "password" ? "text" : "password";
+document.getElementById("reg-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const f = e.target, msg = document.getElementById("msg");
+  const payload = {
+    username  : f.username.value.trim(),
+    password  : f.password.value,
+    email     : f.email.value.trim(),
+    name      : f.name.value.trim(),
+    familyName: f.familyName.value.trim()
+  };
+
+  msg.textContent = "Registrando…";
+
+  try {
+    // Llama al proxy Django (evita CORS y Mixed-Content)
+    const r = await fetch("/api/register/", {
+      method : "POST",
+      headers: { "Content-Type": "application/json" },
+      body   : JSON.stringify(payload)
+    });
+    const res = await r.json().catch(() => ({}));
+
+    if (r.ok) {
+      msg.textContent = "✅ Registro exitoso. Revisa tu correo y confirma.";
+      localStorage.setItem("pending_user", payload.username);
+      setTimeout(() => location.href = "/confirmar/", 2000);
+    } else if (r.status === 400) {
+      msg.textContent = res.message || "❌ Usuario ya existe o datos inválidos.";
+    } else {
+      msg.textContent = res.message || "❌ Error inesperado.";
+    }
+  } catch {
+    msg.textContent = "❌ No se pudo conectar con el servidor.";
   }
+});
 </script>
 
-{% endblock %}
+</body>
+</html>

@@ -1,0 +1,40 @@
+def registrar(request):
+    if request.method == "POST":
+        username = request.POST["username"]
+        password = request.POST["password"]
+        email = request.POST["email"]
+        nombre = request.POST["name"]
+        apellido = request.POST["familyName"]
+
+        # Verifica si ya existe el usuario
+        if UsuarioRegistro.objects.filter(username=username).exists():
+            messages.error(request, "El usuario ya existe.")
+            return redirect("registrar")
+        
+        # Genera y guarda un solo código de confirmación
+        codigo_confirmacion = str(random.randint(100000, 999999))
+
+        # Crea el usuario (no confirmado)
+        nuevo_usuario = UsuarioRegistro.objects.create(
+            username=username,
+            password=password,
+            email=email,
+            nombre=nombre,
+            apellido=apellido,
+            confirmado=False,
+            codigo_confirmacion=codigo_confirmacion  # Usa el mismo
+        )
+
+        # Envía el correo con el código
+        send_mail(
+            "Código de confirmación",
+            f"Tu código es: {codigo_confirmacion}",
+            settings.DEFAULT_FROM_EMAIL,
+            [email],
+            fail_silently=False,
+        )
+
+        messages.success(request, "Te enviamos un código de confirmación a tu correo.")
+        return redirect("confirmar")
+
+    return render(request, "registrar.html")

@@ -1,16 +1,32 @@
 {% extends "base.html" %}
 {% block content %}
 
-
+<!-- Contenedor de bienvenida -->
 <div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
-    <div class="alert alert-success rounded-4 shadow text-center p-4 w-100" style="max-width: 450px; margin:auto;">
-        <h2 class="mb-0">Hola {{ usuario.nombre }}, ¡bienvenido!</h2>
-    </div>
-</div>
-  <h1 class="text-center">Bienvenido a Index</h1>
-
-  <div class="d-flex justify-content-center gap-3 mt-4">
-    <a href="{% url 'productos' %}" class="btn btn-primary">Productos</a>
-    <a href="{% url 'login' %}" class="btn btn-danger">Salir</a>
+  <div class="alert alert-success rounded-4 shadow text-center p-4 w-100" style="max-width: 450px; margin:auto;">
+    <h2 id="welcome" class="mb-0">Hola, ¡bienvenido!</h2>
   </div>
+</div>
+
+<h1 class="text-center">Bienvenido a Index</h1>
+
+<div class="d-flex justify-content-center gap-3 mt-4">
+  <a href="/productos/" class="btn btn-primary">Productos</a>
+  <button class="btn btn-danger" onclick="logout()">Salir</button>
+</div>
+
+<script>
+/* Muestra el nombre almacenado (si existe) */
+document.addEventListener("DOMContentLoaded", () => {
+  const user = localStorage.getItem("pending_user");      // guardado tras registrar
+  if (user) document.getElementById("welcome").textContent = `Hola ${user}, ¡bienvenido!`;
+});
+
+/* Limpia tokens y vuelve al login */
+function logout() {
+  localStorage.clear();
+  location.href = "/login/";
+}
+</script>
+
 {% endblock %}
