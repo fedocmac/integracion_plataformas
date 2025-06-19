@@ -11,10 +11,25 @@ import json
 from pathlib import Path
 from django.conf import settings
 from django.http import Http404
+import jwt
+from datetime import datetime, timezone
 
 # Create your views here.
 def index(request):
-    return HttpResponse("Hola desde la vista index de la app web.")
+    
+    if not check_login(request):
+        return redirect('/login')
+    
+    user_info = get_user_info(request)
+    if not user_info:
+        return redirect('/login')  # No logeado
+
+    username = user_info.get('name')  # o 'email' o 'sub'
+
+    
+    return render(request, 'index.html', {
+        'username': username,   # Nombre del usuario logueado      
+    })
 
 class CompraListAPIView(generics.ListCreateAPIView):
     queryset = Compra.objects.all()
@@ -24,25 +39,70 @@ class CategoriaListAPIView(generics.ListCreateAPIView):
     queryset = Categoria.objects.all()
     serializer_class = CategoriaSerializer
 
+
+def check_login(request):
+    access_token = request.session.get('access_token')
+    if not access_token:
+        return False
+
+    try:
+        payload = jwt.decode(access_token, options={"verify_signature": False})
+        exp_timestamp = payload.get('exp')
+        if not exp_timestamp:
+            return False
+        exp = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
+        if exp < datetime.now(tz=timezone.utc):
+            return False
+        return True
+    except Exception:
+        return False
+
 def historial_compras(request):
-    
+    if not check_login(request):
+        return redirect('/login')
+
     compras_list = Compra.objects.all()
-    
+
+    base_dir = Path(settings.BASE_DIR) / 'datos'
+    archivo_productos = base_dir / 'products.json'
+
+    productos = []
+    if archivo_productos.exists():
+        with open(archivo_productos, 'r', encoding='utf-8') as f:
+            productos = json.load(f)
+
+    productos_dict = {p['id']: p['name'] for p in productos}
+
     paginator = Paginator(compras_list, 10)
     page = request.GET.get('page')
-    
+
     try:
-        compras  = paginator.page(page)
+        compras_page = paginator.page(page)
     except PageNotAnInteger:
-        compras = paginator.page(1)
+        compras_page = paginator.page(1)
     except EmptyPage:
-        compras = paginator.page(paginator.num_pages)
+        compras_page = paginator.page(paginator.num_pages)
+
+    # Crear lista enriquecida para el template
+    compras_enriquecidas = []
+    for compra in compras_page:
     
+        
+        compras_enriquecidas.append({
+            'compra': compra,
+            'producto_name': productos_dict.get(compra.producto_id, 'Producto no encontrado')
+        })
+
     return render(request, 'productos/historial_compras.html', {
-        'compras': compras
+        'compras': compras_enriquecidas,
+        'page_obj': compras_page  # si quieres paginación en template
     })
 
 def confirmar_compra(request, compra_id):
+    
+    if not check_login(request):
+        return redirect('/login')
+    
     compra = get_object_or_404(Compra, pk=compra_id)
     producto_id = compra.producto_id  # El producto relacionado con la compra
     
@@ -64,6 +124,9 @@ def confirmar_compra(request, compra_id):
     })
 
 def detalle_producto(request, producto_id):
+    
+    if not check_login(request):
+        return redirect('/login')
     
     base_dir = Path(settings.BASE_DIR) / 'datos'
     archivo_productos = base_dir / 'products.json'
@@ -145,7 +208,7 @@ def detalle_producto(request, producto_id):
             compra = Compra.objects.create(
                 producto_id=producto_id,
                 cantidad=cantidad,
-                precio_compra=precio
+                precio_compra=precio*cantidad
             )
 
         except requests.RequestException as e:
@@ -159,6 +222,10 @@ def detalle_producto(request, producto_id):
     
 
 def listar_productos(request):
+    
+    if not check_login(request):
+        return redirect('/login')
+    
     busqueda = request.GET.get('q', '').lower()
     
     base_dir = Path(settings.BASE_DIR) / 'datos'
@@ -229,6 +296,10 @@ def listar_productos(request):
     })
 
 def productos(request):
+    
+    if not check_login(request):
+        return redirect('/login')
+    
     return render(request, 'productos/productos.html')
     
     
@@ -296,35 +367,78 @@ def productos(request):
         'productos': productos,
         'busqueda': busqueda,
     })"""
+    
+def get_user_info(request):
+    id_token = request.session.get('id_token')
+    if not id_token:
+        return None
+    try:
+        payload = jwt.decode(id_token, options={"verify_signature": False})
+        return payload  # Para obtener nombre de usuario, mail.
+    except jwt.DecodeError:
+        return None
+    
+def logout(request):
+    if not check_login(request):
+        return redirect('/login')
+    
+    # Limpiar la sesión
+    request.session.flush()
+    
+    return redirect('/login')
+
 
 def login(request):
+    
+    if check_login(request):
+        return redirect('/index')
+    
     if request.method == 'POST':
-        email = request.POST.get('email')
+        username = request.POST.get('username')
         password = request.POST.get('password')
 
         response = requests.post('http://35.168.133.16:3000/login', json={
-            'email': email,
+            'username': username,
             'password': password
         })
 
         if response.status_code == 200:
-            token = response.json().get('token')
-            request.session['token'] = token
-            return redirect('/categorias')  # o cualquier vista segura
-        else:
+            print("Login exitoso, guardando token en sesión")
+            data = response.json()
+            request.session['id_token'] = data.get('token')   
+            request.session['access_token'] = data.get('accessToken') 
+            request.session['refresh_token'] = data.get('refreshToken')
+            return redirect('/index')  
+        elif response.status_code == 400:
             return render(request, 'login.html', {
                 'error': 'Usuario o contraseña incorrectos'
+            })
+        elif response.status_code == 401:
+            return render(request, 'login.html', {
+                'error': 'El acceso no fue autorizado.'
+            })
+        else:
+            return render(request, 'login.html', {
+                'error': f'{response.status_code}: Servicio no disponible en este momento. Inténtalo de nuevo más tarde.'
             })
 
     return render(request, 'login.html')
 
 def eliminar_categoria(request, id):
+    
+    if not check_login(request):
+        return redirect('/login')
+    
     categoria = get_object_or_404(Categoria, id=id)
     categoria.delete()
     return redirect('listar_categorias')  # Redirige a donde listas las categorías
     
 
 def listar_categorias(request):
+    
+    if not check_login(request):
+        return redirect('/login')
+    
     # Obtener el término de búsqueda (si existe)
     busqueda = request.GET.get('q', '')
     
@@ -351,6 +465,10 @@ def listar_categorias(request):
     })
     
 def nueva_categoria(request):
+    
+    if not check_login(request):
+        return redirect('/login')
+    
     if request.method == "POST":
         form = CategoriaForm(request.POST)
         
@@ -371,6 +489,9 @@ def nueva_categoria(request):
 
 
 def modificar_categoria(request, id):
+    
+    if not check_login(request):
+        return redirect('/login')
     
     categoria = get_object_or_404(Categoria, id=id)
 

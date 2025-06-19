@@ -1,1 +1,54 @@
-<h1>Index</h1>
+{% extends "base.html" %}
+{% load formatos %}
+{% block content %}
+
+<style>
+  .welcome-container {
+    margin-top: 100px;
+    text-align: center;
+  }
+  .welcome-container h1 {
+    color: #0d6efd; /* azul bootstrap */
+    font-weight: 700;
+  }
+  .welcome-container p {
+    font-size: 1.2rem;
+    color: #333;
+  }
+  .links-container {
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+  }
+  .link-card {
+    background: #0d6efd;
+    color: white;
+    padding: 20px 30px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
+    transition: background 0.3s ease;
+  }
+  .link-card:hover {
+    background: #084298;
+    text-decoration: none;
+    color: white;
+  }
+</style>
+
+
+<div class="welcome-container">
+  <h1>¡Hola, {{ username }}!</h1>
+  <p>Bienvenido a tu panel de control.</p>
+
+  <div class="links-container">
+    <a href="{% url 'productos' %}" class="link-card">Productos</a>
+    <a href="{% url 'listar_categorias' %}" class="link-card">Categorías</a>
+    <a href="{% url 'historial_compras' %}" class="link-card">Historial de Compras</a>
+  </div>
+</div>
+    
+
+{% endblock %}

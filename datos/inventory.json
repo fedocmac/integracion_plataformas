@@ -1,8 +1,8 @@
 [
     {
         "productId": 1,
-        "quantity": 25,
-        "minStock": 5,
+        "quantity": 45,
+        "minStock": 4,
         "location": "Main Showroom",
         "lastUpdated": "2025-06-15T21:06:58.704470"
     },

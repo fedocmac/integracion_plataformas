@@ -1,12 +1,12 @@
 {% extends "base.html" %}
-
+{% load formatos %}
 {% block content %}
 
 <div class="container">
 
     
 
-    <a href="{% url 'productos' %}" class="btn btn-primary mb-3 mt-3">
+    <a href="{% url 'index' %}" class="btn btn-primary mb-4 mt-4">
         <i class="bi bi-arrow-left"></i>
     </a>
 
@@ -24,12 +24,12 @@
             </tr>
         </thead>
         <tbody>
-            {% for compra in compras %}
+            {% for item in compras %}
                 <tr>
-                    <td>{{ compra.producto.nombre }}</td>
-                    <td>${{ compra.precio_compra|floatformat:2 }}</td>
-                    <td>{{ compra.cantidad }}</td>
-                    <td>{{ compra.fecha|date:"Y-m-d H:i" }}</td>
+                    <td>{{ item.producto_name }}</td>
+                    <td>{{ item.compra.precio_compra|clp_format }}</td>
+                    <td>{{ item.compra.cantidad }}</td>
+                    <td>{{ item.compra.fecha|date:"Y-m-d H:i" }}</td>
                 </tr>
             {% endfor %}
         </tbody>
@@ -38,14 +38,14 @@
 <!-- Navegación de páginas -->
 <nav class="mt-4">
     <ul class="pagination">
-        {% if compras.has_previous %}
+        {% if page_obj.has_previous %}
             <li class="page-item">
                 <a class="page-link" href="?page=1">
                     &laquo; Primera
                 </a>
             </li>
             <li class="page-item">
-                <a class="page-link" href="?page={{ compras.previous_page_number }}">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
                     Anterior
                 </a>
             </li>
@@ -53,18 +53,18 @@
 
         <li class="page-item disabled">
             <span class="page-link">
-                Página {{ compras.number }} de {{ compras.paginator.num_pages }}
+                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
             </span>
         </li>
 
-        {% if compras.has_next %}
+        {% if page_obj.has_next %}
             <li class="page-item">
-                <a class="page-link" href="?page={{ compras.next_page_number }}">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">
                     Siguiente
                 </a>
             </li>
             <li class="page-item">
-                <a class="page-link" href="?page={{ compras.paginator.num_pages }}">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
                     Última &raquo;
                 </a>
             </li>

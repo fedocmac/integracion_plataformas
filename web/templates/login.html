@@ -1,5 +1,5 @@
 
-{% extends "base.html" %}
+{% extends "base2.html" %}
 
 {% block content %}
 
@@ -14,15 +14,25 @@
 
 <div class="container col-md-3 centered-container">
 <main class="form-signin w-100">
-<form>
+<form method="post" action="">
+  {% csrf_token %}
+
+  {% if error %}
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+  <strong>{{ error }}</strong>
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+
+</div>
+{% endif %}
+
   <h1 class="h3 mb-3 fw-normal">Iniciar sesión</h1>
 
   <div class="form-floating">
-    <input type="email" class="form-control" id="floatingInput" placeholder="">
+    <input type="text" name="username" class="form-control" id="floatingInput" placeholder="Usuario" required>
     <label for="floatingInput">Usuario</label>
   </div>
   <div class="form-floating mt-2">
-    <input type="password" class="form-control" id="floatingPassword" placeholder="">
+    <input type="password" name="password" class="form-control" id="floatingPassword" placeholder="Contraseña" required>
     <label for="floatingPassword">Contraseña</label>
   </div>
 
