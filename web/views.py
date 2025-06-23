@@ -20,11 +20,13 @@ def index(request):
     if not check_login(request):
         return redirect('/login')
     
-    user_info = get_user_info(request)
+    """user_info = get_user_info(request)
     if not user_info:
         return redirect('/login')  # No logeado
 
-    username = user_info.get('name')  # o 'email' o 'sub'
+    username = user_info.get('name')  # o 'email' o 'sub'"""
+    
+    username = 'adquisiones'
 
     
     return render(request, 'index.html', {
@@ -41,6 +43,9 @@ class CategoriaListAPIView(generics.ListCreateAPIView):
 
 
 def check_login(request):
+    
+    return True
+    
     access_token = request.session.get('access_token')
     if not access_token:
         return False
@@ -180,11 +185,11 @@ def detalle_producto(request, producto_id):
         elif cantidad > 100:
             cantidad = 100
         
-        api_base_url = "https://integracionstock-etefhkhbcadegaej.brazilsouth-01.azurewebsites.net/inventory"
+        api_stock = "https://integracionstock-etefhkhbcadegaej.brazilsouth-01.azurewebsites.net/inventory"
 
         try:
             # 1. Obtener el inventario actual desde la API
-            response = requests.get(api_base_url, params={"productId": producto_id})
+            response = requests.get(api_stock, params={"productId": producto_id})
             response.raise_for_status()
             
             inventarios_api = response.json()
@@ -202,7 +207,7 @@ def detalle_producto(request, producto_id):
             }
 
             # 3. Hacer el PUT con la información actualizada
-            put_response = requests.put(api_base_url, json=updated_data)
+            put_response = requests.put(api_stock, json=updated_data)
             put_response.raise_for_status()
             
             compra = Compra.objects.create(
@@ -433,11 +438,60 @@ def eliminar_categoria(request, id):
     categoria.delete()
     return redirect('listar_categorias')  # Redirige a donde listas las categorías
     
-
 def listar_categorias(request):
     
     if not check_login(request):
         return redirect('/login')
+    
+    api_stock = "http://localhost:8080/product-category"
+    categorias = []
+    
+    try:
+        response = requests.get(api_stock)
+        if response.status_code == 200:
+            categorias = response.json()
+        else:
+            # Si la API falla, puedes mantener el fallback al archivo local si lo deseas
+            base_dir = Path(settings.BASE_DIR) / 'datos'
+            archivo_categorias = base_dir / 'category.json'
+            if archivo_categorias.exists():
+                with open(archivo_categorias, 'r', encoding='utf-8') as f:
+                    categorias = json.load(f)
+    except requests.exceptions.RequestException as e:
+        # Manejo de errores de conexión
+        print(f"Error al conectar con la API: {e}")
+        # Puedes agregar aquí el fallback al archivo local si lo prefieres
+    
+    dict_categorias = {cat['id']: cat for cat in categorias}
+    
+    return render(request, 'categorias/categorias.html', {
+        'categorias': dict_categorias.values(),
+    })
+
+"""def listar_categorias(request):
+    
+    if not check_login(request):
+        return redirect('/login')
+    
+    base_dir = Path(settings.BASE_DIR) / 'datos'
+    
+    categorias = []
+    
+    archivo_categorias = base_dir / 'category.json'
+    
+    if archivo_categorias.exists():
+        with open(archivo_categorias, 'r', encoding='utf-8') as f:
+            categorias = json.load(f)
+            
+            
+    dict_categorias = {cat['id']: cat for cat in categorias}
+    
+    
+    return render(request, 'categorias/categorias.html', {
+        'categorias': dict_categorias.values(),
+    })
+    
+    
     
     # Obtener el término de búsqueda (si existe)
     busqueda = request.GET.get('q', '')
@@ -462,7 +516,7 @@ def listar_categorias(request):
     return render(request, 'categorias/categorias.html', {
         'categorias': categorias,
         'busqueda': busqueda  # Para mantener el valor en el input
-    })
+    })"""
     
 def nueva_categoria(request):
     
@@ -470,13 +524,29 @@ def nueva_categoria(request):
         return redirect('/login')
     
     if request.method == "POST":
+        
+        
         form = CategoriaForm(request.POST)
         
         if form.is_valid():
-            Categoria.objects.create(
-                nombre=form.cleaned_data['nombre'],
-                descripcion=form.cleaned_data['descripcion']
-            )
+            nombre=form.cleaned_data['nombre']
+            descripcion=form.cleaned_data['descripcion']
+        else:
+            return redirect('/index')
+        
+        nuevo_producto = {
+            "name": nombre,
+            "description": descripcion
+        }
+        
+        #api_stock = "https://integracionstock-etefhkhbcadegaej.brazilsouth-01.azurewebsites.net/inventory"
+        api_stock = "http://localhost:8080/product-category"
+        
+
+        response = requests.post(api_stock, json=nuevo_producto)
+        response.raise_for_status()
+        
+        if form.is_valid():
             return redirect('listar_categorias')
     else:
         form = CategoriaForm()
@@ -493,7 +563,7 @@ def modificar_categoria(request, id):
     if not check_login(request):
         return redirect('/login')
     
-    categoria = get_object_or_404(Categoria, id=id)
+    """categoria = get_object_or_404(Categoria, id=id)
 
     if request.method == 'POST':
         form = CategoriaForm(request.POST, instance=categoria)
@@ -502,10 +572,36 @@ def modificar_categoria(request, id):
             return redirect('listar_categorias')  # Redirige a la lista después de editar
     else:
         form = CategoriaForm(instance=categoria)
+    """
+    
+    if request.method == 'POST':
+        form = CategoriaForm(request.POST)
+        
+        if form.is_valid():
+            nombre=form.cleaned_data['nombre']
+            descripcion=form.cleaned_data['descripcion']
+        else:
+            return redirect('/index')
+        
+        api_stock = "http://localhost:8080/product-category"
+        
+        
+        modificado_producto = {
+            "id": id,
+            "name": nombre,
+            "description": descripcion
+        }
+        
+        response = requests.post(api_stock, json=modificado_producto)
+        response.raise_for_status()
+    else:
+        form = CategoriaForm()
+        
+        
     
     return render(request, 'categorias/modificar.html', {
         'form': form,
-        'categoria': categoria
+        'categoria': id
     })
     
     

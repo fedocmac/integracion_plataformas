@@ -82,11 +82,11 @@
     },
     {
         "id": 10,
-        "sku": "SKU TEST",
-        "name": "NAME TEST",
-        "description": "DESCRIPTION TEST",
-        "price": 123456789,
-        "cost": 987654321,
-        "categoryId": 1
+        "sku": "NET-SWI-002",
+        "name": "10Gb Network Switch",
+        "description": "8-port managed 10Gb Ethernet switch for home or office",
+        "price": 19900,
+        "cost": 14900,
+        "categoryId": 4
     }
 ]

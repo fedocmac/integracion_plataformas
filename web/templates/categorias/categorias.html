@@ -38,10 +38,9 @@
         {% for categoria in categorias %}
             <li class="list-group-item">
                 <div>
-                {{ categoria.nombre }}
-                <small class="text-muted">{{ categoria.descripcion|default:"Sin descripción" }}</small>
+                {{ categoria.name }}
+                <small class="text-muted">{{ categoria.description|default:"Sin descripción" }}</small>
                 
-
 
                 <a href="{% url 'modificar_categoria' categoria.id %}" class="btn btn-link">
                     <i class="bi bi-pencil-square"></i>
