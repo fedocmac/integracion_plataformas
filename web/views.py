@@ -109,7 +109,7 @@ def historial_compras(request):
 
     return render(request, 'productos/historial_compras.html', {
         'compras': compras_enriquecidas,
-        'page_obj': compras_page  # si quieres paginación en template
+        'page_obj': compras_page 
     })
 
 def confirmar_compra(request, compra_id):
@@ -118,7 +118,7 @@ def confirmar_compra(request, compra_id):
         return redirect('/login')
     
     compra = get_object_or_404(Compra, pk=compra_id)
-    producto_id = compra.producto_id  # El producto relacionado con la compra
+    producto_id = compra.producto_id 
     
     
     base_dir = Path(settings.BASE_DIR) / 'datos'
@@ -144,25 +144,20 @@ def detalle_producto(request, producto_id):
     
     base_dir = Path(settings.BASE_DIR) / 'datos'
     archivo_productos = base_dir / 'products.json'
-    archivo_categorias = base_dir / 'category.json'
     archivo_inventario = base_dir / 'inventory.json'
     
     productos = []
-    categorias = []
     inventarios = []
     
     if archivo_productos.exists():
         with open(archivo_productos, 'r', encoding='utf-8') as f:
             productos = json.load(f)
-    if archivo_categorias.exists():
-        with open(archivo_categorias, 'r', encoding='utf-8') as f:
-            categorias = json.load(f)
     if archivo_inventario.exists():
         with open(archivo_inventario, 'r', encoding='utf-8') as f:
             inventarios = json.load(f)
     
     dict_productos = {prod['id']: prod for prod in productos}
-    dict_categorias = {cat['id']: cat for cat in categorias}
+    dict_categorias = {cat.id: cat.name for cat in Categoria.objects.all()}
     dict_inventarios = {inv['productId']: inv for inv in inventarios}
 
     # Buscar el producto solicitado
@@ -172,7 +167,7 @@ def detalle_producto(request, producto_id):
 
     # Agregar info de categoría y stock
     cat_id = producto.get('categoryId')
-    categoria = dict_categorias.get(cat_id, {}).get('name', 'Sin categoría')
+    categoria = dict_categorias.get(cat_id, 'Sin categoría')
     
     inventario = dict_inventarios.get(producto_id, {})
     stock = inventario.get('quantity', 0)
@@ -197,16 +192,15 @@ def detalle_producto(request, producto_id):
         api_stock = "https://integracionstock-etefhkhbcadegaej.brazilsouth-01.azurewebsites.net/inventory"
 
         try:
-            # 1. Obtener el inventario actual desde la API
+            #Obtener el inventario actual desde la API
             response = requests.get(api_stock, params={"productId": producto_id})
             response.raise_for_status()
             
             inventarios_api = response.json()
             if not inventarios_api:
                 raise Http404("Inventario no encontrado en la API")
-            inventario = inventarios_api[0]  # Tomamos el primer (y único) resultado
+            inventario = inventarios_api[0]  # tomar primer resultado
 
-            # 2. Crear nuevo payload para PUT
             updated_data = {
                 "productId": inventario['productId'],
                 "quantity": inventario['quantity'] + cantidad,
@@ -246,19 +240,14 @@ def listar_productos(request):
     
     # Cargar archivos JSON
     productos = []
-    categorias = []
     inventarios = []
     
     archivo_productos = base_dir / 'products.json'
-    #archivo_categorias = base_dir / 'category.json'
     archivo_inventario = base_dir / 'inventory.json'
     
     if archivo_productos.exists():
         with open(archivo_productos, 'r', encoding='utf-8') as f:
             productos = json.load(f)
-    #if archivo_categorias.exists():
-    #    with open(archivo_categorias, 'r', encoding='utf-8') as f:
-    #        categorias = json.load(f)
     if archivo_inventario.exists():
         with open(archivo_inventario, 'r', encoding='utf-8') as f:
             inventarios = json.load(f)
