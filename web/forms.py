@@ -1,33 +1,42 @@
 from django import forms
 from .models import Categoria
+from django.core.exceptions import ValidationError
 
 
 
 class CategoriaForm(forms.ModelForm):
     class Meta:
         model = Categoria
-        fields = ['nombre', 'descripcion']  # Campos del modelo a incluir
+        fields = ['name', 'description']  # <-- Usa los nombres reales
         labels = {
-            'nombre': 'Nombre de la categoría',
-            'descripcion': 'Descripción de la categoría'
+            'name': 'Nombre de la categoría',
+            'description': 'Descripción de la categoría'
         }
         widgets = {
-            'nombre': forms.TextInput(attrs={
+            'name': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Ejemeplo: Sonido'
+                'placeholder': 'Ejemplo: Sonido'
             }),
-            'descripcion': forms.TextInput(attrs={
+            'description': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Ejemeplo: Accesorios de audio como parlantes y audifonos.'
+                'placeholder': 'Ejemplo: Accesorios de audio como parlantes y audífonos.'
             })
         }
         error_messages = {
-            'nombre': {
+            'name': {
                 'required': 'Este campo es obligatorio',
                 'max_length': 'El nombre no puede tener más de %(limit_value)d caracteres.',
             },
-            'descripcion': {
+            'description': {
                 'required': 'Este campo es obligatorio',
                 'max_length': 'La descripción no puede tener más de %(limit_value)d caracteres.',
             }
         }
+    def clean_name(self):
+        name = self.cleaned_data['name']
+        qs = Categoria.objects.filter(name__iexact=name)
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise ValidationError("Ya existe una categoría con este nombre.")
+        return name

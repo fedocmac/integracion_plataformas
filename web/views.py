@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import CategoriaForm
-from .models import Categoria, Producto, Compra
+from .models import Categoria, Compra
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.exceptions import PermissionDenied
 from rest_framework import generics
@@ -13,6 +13,7 @@ from django.conf import settings
 from django.http import Http404
 import jwt
 from datetime import datetime, timezone
+from django.contrib import messages
 
 # Create your views here.
 def index(request):
@@ -37,7 +38,15 @@ class CompraListAPIView(generics.ListCreateAPIView):
     queryset = Compra.objects.all()
     serializer_class = CompraSerializer
 
+class CompraDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Compra.objects.all()
+    serializer_class = CompraSerializer
+
 class CategoriaListAPIView(generics.ListCreateAPIView):
+    queryset = Categoria.objects.all()
+    serializer_class = CategoriaSerializer
+
+class CategoriaDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Categoria.objects.all()
     serializer_class = CategoriaSerializer
 
@@ -241,21 +250,22 @@ def listar_productos(request):
     inventarios = []
     
     archivo_productos = base_dir / 'products.json'
-    archivo_categorias = base_dir / 'category.json'
+    #archivo_categorias = base_dir / 'category.json'
     archivo_inventario = base_dir / 'inventory.json'
     
     if archivo_productos.exists():
         with open(archivo_productos, 'r', encoding='utf-8') as f:
             productos = json.load(f)
-    if archivo_categorias.exists():
-        with open(archivo_categorias, 'r', encoding='utf-8') as f:
-            categorias = json.load(f)
+    #if archivo_categorias.exists():
+    #    with open(archivo_categorias, 'r', encoding='utf-8') as f:
+    #        categorias = json.load(f)
     if archivo_inventario.exists():
         with open(archivo_inventario, 'r', encoding='utf-8') as f:
             inventarios = json.load(f)
 
     # Crear diccionarios para acceso rápido
-    dict_categorias = {cat['id']: cat for cat in categorias}
+    #dict_categorias = {cat['id']: cat for cat in categorias}
+    dict_categorias = {cat.id: cat.name for cat in Categoria.objects.all()}
     dict_inventarios = {inv['productId']: inv for inv in inventarios}
 
     # Filtrar productos por búsqueda y enriquecer con categoría y stock
@@ -264,10 +274,14 @@ def listar_productos(request):
         nombre = prod.get('name', '').lower()
         if busqueda in nombre:
             # Agregar categoría
-            cat_id = prod.get('categoryId')
-            categoria = dict_categorias.get(cat_id, {}).get('name', 'Sin categoría')
+            #cat_id = prod.get('categoryId')
+            #categoria = dict_categorias.get(cat_id, {}).get('name', 'Sin categoría')
             
             # Agregar stock
+            
+            cat_id = prod.get('categoryId')
+            categoria = dict_categorias.get(cat_id, 'Sin categoría')
+            
             prod_id = prod.get('id')
             
             inventario = dict_inventarios.get(prod_id, {})
@@ -434,11 +448,30 @@ def eliminar_categoria(request, id):
     if not check_login(request):
         return redirect('/login')
     
+    # Cargar productos desde products.json
+    base_dir = Path(settings.BASE_DIR) / 'datos'
+    archivo_productos = base_dir / 'products.json'
+
+    productos = []
+    if archivo_productos.exists():
+        with open(archivo_productos, 'r', encoding='utf-8') as f:
+            productos = json.load(f)
+    
+    # Verificar si algún producto tiene esta categoría
+    en_uso = any(str(prod.get('categoryId')) == str(id) for prod in productos)
+
+    if en_uso:
+        messages.error(request, 'No se puede eliminar la categoría porque está siendo utilizada por al menos un producto.')
+        return redirect('listar_categorias')
+    
     categoria = get_object_or_404(Categoria, id=id)
     categoria.delete()
+    
+    messages.success(request, 'Categoría eliminada exitosamente.')
+    
     return redirect('listar_categorias')  # Redirige a donde listas las categorías
     
-def listar_categorias(request):
+"""def listar_categorias(request):
     
     if not check_login(request):
         return redirect('/login')
@@ -466,14 +499,14 @@ def listar_categorias(request):
     
     return render(request, 'categorias/categorias.html', {
         'categorias': dict_categorias.values(),
-    })
+    })"""
 
-"""def listar_categorias(request):
+def listar_categorias(request):
     
     if not check_login(request):
         return redirect('/login')
     
-    base_dir = Path(settings.BASE_DIR) / 'datos'
+    """base_dir = Path(settings.BASE_DIR) / 'datos'
     
     categorias = []
     
@@ -489,7 +522,7 @@ def listar_categorias(request):
     
     return render(request, 'categorias/categorias.html', {
         'categorias': dict_categorias.values(),
-    })
+    })"""
     
     
     
@@ -498,9 +531,9 @@ def listar_categorias(request):
     
     # Filtrar categorías si hay búsqueda
     if busqueda:
-        categorias_list = Categoria.objects.filter(nombre__icontains=busqueda).order_by('nombre')
+        categorias_list = Categoria.objects.filter(name__icontains=busqueda).order_by('name')
     else:
-        categorias_list = Categoria.objects.all().order_by('nombre')
+        categorias_list = Categoria.objects.all().order_by('name')
     
     # Paginación (10 items por página)
     paginator = Paginator(categorias_list, 10)
@@ -516,9 +549,47 @@ def listar_categorias(request):
     return render(request, 'categorias/categorias.html', {
         'categorias': categorias,
         'busqueda': busqueda  # Para mantener el valor en el input
-    })"""
+    })
     
 def nueva_categoria(request):
+    if request.method == "POST":
+        form = CategoriaForm(request.POST)
+        if form.is_valid():
+            
+            messages.success(request, 'Categoría creada exitosamente.')
+            
+            Categoria.objects.create(
+                name=form.cleaned_data['name'],
+                description=form.cleaned_data['description']
+            )
+            return redirect('listar_categorias')
+    else:
+        form = CategoriaForm()
+
+    return render(request, 'categorias/nueva.html', {'form': form})
+
+def modificar_categoria(request, id):
+    
+    try:
+        categoria = Categoria.objects.get(id=id)
+    except Categoria.DoesNotExist:
+        return render(request, '404.html', status=404)
+    
+    if request.method == 'POST':
+        form = CategoriaForm(request.POST, instance=categoria)
+        if form.is_valid():
+            form.save()
+            return redirect('listar_categorias')
+    else:
+        form = CategoriaForm(instance=categoria)
+
+    return render(request, 'categorias/modificar.html', {
+        'form': form,
+        'categoria': categoria
+    })
+    
+    
+"""def nueva_categoria(request):
     
     if not check_login(request):
         return redirect('/login')
@@ -558,12 +629,15 @@ def nueva_categoria(request):
     return render(request, 'categorias/nueva.html', context)
 
 
+"""
+
+"""
 def modificar_categoria(request, id):
     
     if not check_login(request):
         return redirect('/login')
     
-    """categoria = get_object_or_404(Categoria, id=id)
+    categoria = get_object_or_404(Categoria, id=id)
 
     if request.method == 'POST':
         form = CategoriaForm(request.POST, instance=categoria)
@@ -572,38 +646,11 @@ def modificar_categoria(request, id):
             return redirect('listar_categorias')  # Redirige a la lista después de editar
     else:
         form = CategoriaForm(instance=categoria)
-    """
-    
-    if request.method == 'POST':
-        form = CategoriaForm(request.POST)
-        
-        if form.is_valid():
-            nombre=form.cleaned_data['nombre']
-            descripcion=form.cleaned_data['descripcion']
-        else:
-            return redirect('/index')
-        
-        api_stock = "http://localhost:8080/product-category"
-        
-        
-        modificado_producto = {
-            "id": id,
-            "name": nombre,
-            "description": descripcion
-        }
-        
-        response = requests.post(api_stock, json=modificado_producto)
-        response.raise_for_status()
-    else:
-        form = CategoriaForm()
-        
-        
     
     return render(request, 'categorias/modificar.html', {
         'form': form,
         'categoria': id
     })
     
+    """
     
-def error_404_view(request, exception):
-    return render(request, '404.html', status=404)

@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+from django.contrib import messages
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'web',
     'rest_framework',
+    'drf_yasg',
     'rest_framework_simplejwt',
     'django.contrib.humanize',
 ]
@@ -58,9 +60,18 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    
 ]
 
 ROOT_URLCONF = 'adquisiones.urls'
+
+LOGIN_URL = '/admin/login/'
+
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,      # Desactiva "Django Login"
+    'SECURITY_DEFINITIONS': None,   # Elimina el botón "Authorize"
+}
 
 TEMPLATES = [
     {

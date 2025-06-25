@@ -18,8 +18,8 @@
         <thead>
             <tr>
                 <th>Producto</th>
-                <th>Precio</th>
                 <th>Cantidad</th>
+                <th>Precio</th>
                 <th>Fecha</th>
             </tr>
         </thead>
@@ -27,8 +27,8 @@
             {% for item in compras %}
                 <tr>
                     <td>{{ item.producto_name }}</td>
-                    <td>{{ item.compra.precio_compra|clp_format }}</td>
                     <td>{{ item.compra.cantidad }}</td>
+                    <td>{{ item.compra.precio_compra|clp_format }}</td>
                     <td>{{ item.compra.fecha|date:"Y-m-d H:i" }}</td>
                 </tr>
             {% endfor %}

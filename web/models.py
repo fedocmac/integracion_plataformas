@@ -1,14 +1,19 @@
 from django.db import models
 from django.core.validators import MinLengthValidator, MinValueValidator
+from django.db.models.functions import Lower
 
 
 class Categoria(models.Model):
-    nombre = models.CharField(
+    name = models.CharField(
         max_length=100,
         verbose_name='Nombre',
-        unique=True  # Evita nombres duplicados
+        
+        error_messages={
+        'unique': 'Ya existe una categoría con este nombre. Por favor, elige otro.',
+        'required': 'Este campo es obligatorio.',
+    }
     )
-    descripcion = models.CharField(
+    description = models.CharField(
         max_length=250,
         verbose_name='Descripción',
         blank=True,  # Opcional
@@ -18,13 +23,20 @@ class Categoria(models.Model):
     class Meta:
         verbose_name = 'Categoría'
         verbose_name_plural = 'Categorías'
-        ordering = ['nombre']  # Orden alfabético por defecto
+        ordering = ['name']  # Orden alfabético por defecto
+        
+        constraints = [
+            models.UniqueConstraint(
+                Lower('name'),
+                name='unique_categoria_name_ci'
+            )
+        ]
 
     def __str__(self):
-        return self.nombre  # Representación legible en el admin/consola
+        return self.name  # Representación legible en el admin/consola
     
 
-class Producto(models.Model):
+"""class Producto(models.Model):
     nombre = models.CharField(
         max_length=100,
         verbose_name='Nombre',
@@ -54,7 +66,7 @@ class Producto(models.Model):
 
     def __str__(self):
         return self.nombre
-    
+"""
     
 class Compra(models.Model):
     producto_id = models.IntegerField(verbose_name='ID del producto')

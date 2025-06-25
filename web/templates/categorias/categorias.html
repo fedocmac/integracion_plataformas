@@ -13,6 +13,25 @@
         <i class="bi bi-plus-circle"></i> Nueva categoría
     </a>
 
+    {% if messages %}
+  {% for message in messages %}
+    <div class="alert 
+      {% if 'error' in message.tags %}
+        alert-danger
+      {% elif 'success' in message.tags %}
+        alert-success
+      {% elif 'warning' in message.tags %}
+        alert-warning
+      {% else %}
+        alert-info
+      {% endif %}
+      alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {% endfor %}
+{% endif %}
+
     <h2>Lista de Categorías</h2>
 
     <form method="get" class="mb-4">
@@ -38,7 +57,7 @@
         {% for categoria in categorias %}
             <li class="list-group-item">
                 <div>
-                {{ categoria.name }}
+                ID {{ categoria.id }} {{ categoria.name }}
                 <small class="text-muted">{{ categoria.description|default:"Sin descripción" }}</small>
                 
 
